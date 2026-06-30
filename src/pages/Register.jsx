@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { HeartPulse, Loader2, ChevronRight, ChevronLeft, Check } from "lucide-react";
 import Logo from "../components/Logo";
 import { BASE_URL, PATIENT_PORTAL_URL } from "../constants";
@@ -39,7 +38,6 @@ const initialErrors = {
 };
 
 export default function Register() {
-  const navigate = useNavigate();
   const [isVerifying, setIsVerifying] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -67,7 +65,7 @@ export default function Register() {
 
     const storedToken = sessionStorage.getItem("ciamIdToken");
     if (!tokenFromUrl && !storedToken) {
-      navigate("/login", { replace: true });
+      window.location.href = PATIENT_PORTAL_URL;
       return;
     }
 
@@ -127,7 +125,7 @@ export default function Register() {
       if (err.message?.includes("expired") || err.message?.includes("Invalid")) {
         sessionStorage.removeItem("ciamIdToken");
         sessionStorage.removeItem("backendToken");
-        navigate("/login", { replace: true });
+        window.location.href = PATIENT_PORTAL_URL;
         return;
       }
       setServerError(err.message || "Verification failed.");
@@ -292,7 +290,7 @@ export default function Register() {
         {serverError && (
           <div className="w-full mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
             {serverError}
-            <button onClick={() => navigate("/login")} className="ml-2 underline font-medium">
+            <button onClick={() => window.location.href = PATIENT_PORTAL_URL} className="ml-2 underline font-medium">
               Back to login
             </button>
           </div>
