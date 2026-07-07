@@ -5,8 +5,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/register" element={<Register />} />
-        <Route path="*" element={<Navigate to="/register" replace />} />
+        <Route path="/standalone/registration" element={<Register />} />
+        <Route path="*" element={<Navigate to="/standalone/registration" replace />} />
       </Routes>
     </BrowserRouter>
   );
