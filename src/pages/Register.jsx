@@ -102,7 +102,7 @@ export default function Register() {
       const res = await fetch(`${BASE_URL}/api/standalone/auth/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken: token, email, userId }),
+        body: JSON.stringify({ idToken: token, email, userId, userType: "patient" }),
       });
 
       if (!res.ok) {
