@@ -97,6 +97,37 @@ export default function Register() {
     }
   }, []);
 
+  async function redirectToPatientPortalWithHandoff(backendToken) {
+  if (!backendToken) {
+    throw new Error("Authentication token is missing.");
+  }
+
+  const response = await fetch(
+    `${BASE_URL}/api/standalone/auth/handoff`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${backendToken}`,
+      },
+    }
+  );
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok || !data.code) {
+    throw new Error(
+      data.error || "Failed to create authentication handoff."
+    );
+  }
+
+  sessionStorage.removeItem("ciamIdToken");
+  sessionStorage.removeItem("backendToken");
+
+  // Use a URL fragment so the code is not sent in HTTP requests.
+  window.location.replace(`${PATIENT_PORTAL_URL}#code=${encodeURIComponent(data.code)}`);
+}
+
   async function verifyCIAMToken(token, email, userId) {
     try {
       const res = await fetch(`${BASE_URL}/api/standalone/auth/verify`, {
@@ -115,8 +146,7 @@ export default function Register() {
 
       // Already registered — send straight to patient-portal
       if (data.profileComplete === true) {
-        sessionStorage.removeItem("ciamIdToken");
-        window.location.href = `${PATIENT_PORTAL_URL}?backendToken=${encodeURIComponent(data.token)}`;
+        await redirectToPatientPortalWithHandoff(data.token);
         return;
       }
 
@@ -229,8 +259,8 @@ export default function Register() {
       }
 
       // Clean up and send to patient-portal with backendToken
-      sessionStorage.removeItem("ciamIdToken");
-      window.location.href = `${PATIENT_PORTAL_URL}?backendToken=${encodeURIComponent(token)}`;
+      // Send to patient portal using a one-time authentication code
+      await redirectToPatientPortalWithHandoff(token);
 
     } catch (err) {
       setServerError(err.message || "Something went wrong. Please try again.");
